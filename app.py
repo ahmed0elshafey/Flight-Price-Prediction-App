@@ -1,12 +1,25 @@
 import streamlit as st
 import pandas as pd
 import joblib
+import os
+import gdown  # pip install gdown
 
-model = joblib.load("rf_model.pkl")
+MODEL_PATH = "rf_model.pkl"
+GOOGLE_DRIVE_URL = "https://drive.google.com/file/d/1BQLQU3RqH-rLErcVSC0kwPTD0e9I7Rks/view?usp=sharing"  # <-- حط هنا ID بتاع الملف من Google Drive
 
-st.title("✈️ Flight Price Prediction App (Random Forest)")
+# --- Download model if not exists ---
+@st.cache_resource
+def load_model():
+    if not os.path.exists(MODEL_PATH):
+        with st.spinner("Downloading model..."):
+            gdown.download(GOOGLE_DRIVE_URL, MODEL_PATH, quiet=False)
+    return joblib.load(MODEL_PATH)
 
-# --- Inputs ---
+model = load_model()
+
+# --- Streamlit UI ---
+st.title("Flight Price Prediction App (Random Forest)")
+
 airline = st.selectbox("Airline", ["AirAsia", "Air India", "GoAir", "IndiGo", "SpiceJet", "Vistara"])
 source_city = st.selectbox("Source City", ["Banglore", "Chennai", "Delhi", "Kolkata", "Mumbai", "Hyderabad"])
 departure_time = st.selectbox("Departure Time", ["Morning", "Afternoon", "Evening", "Night", "Early Morning", "Late Night"])
@@ -30,4 +43,5 @@ if st.button("Predict Price"):
     })
 
     prediction = model.predict(input_data)[0]
-    st.success(f"Predicted Price: {prediction:,.2f} $")
+    usd_price = prediction   # تقريبًا 1 USD = 83 INR
+    st.success(f"Predicted Price: ${usd_price:,.2f} USD")
