@@ -4,8 +4,8 @@ import joblib
 import gdown
 import os
 
-# Google Drive File ID (بدل XXXXX بالـ ID بتاعك)
-GOOGLE_DRIVE_ID = "https://drive.google.com/uc?id=1BQLQU3RqH-rLErcVSC0kwPTD0e9I7Rks"
+# Google Drive File ID (خليها ID بس من غير لينك كامل)
+GOOGLE_DRIVE_ID = "1BQLQU3RqH-rLErcVSC0kwPTD0e9I7Rks"
 MODEL_PATH = "rf_model.pkl"
 
 @st.cache_resource
