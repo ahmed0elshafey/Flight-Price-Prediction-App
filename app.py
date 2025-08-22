@@ -1,25 +1,30 @@
 import streamlit as st
 import pandas as pd
 import joblib
+import gdown
 import os
-import gdown  # pip install gdown
 
+# Google Drive File ID (بدل XXXXX بالـ ID بتاعك)
+GOOGLE_DRIVE_ID = "https://drive.google.com/file/d/1BQLQU3RqH-rLErcVSC0kwPTD0e9I7Rks/view?usp=sharing"
 MODEL_PATH = "rf_model.pkl"
-GOOGLE_DRIVE_URL = "https://drive.google.com/file/d/1BQLQU3RqH-rLErcVSC0kwPTD0e9I7Rks/view?usp=sharing"  # <-- حط هنا ID بتاع الملف من Google Drive
 
-# --- Download model if not exists ---
 @st.cache_resource
 def load_model():
+    # لو الموديل مش موجود في السيرفر نزله من Google Drive
     if not os.path.exists(MODEL_PATH):
-        with st.spinner("Downloading model..."):
-            gdown.download(GOOGLE_DRIVE_URL, MODEL_PATH, quiet=False)
+        url = f"https://drive.google.com/uc?id={GOOGLE_DRIVE_ID}"
+        st.write("⬇️ Downloading model from Google Drive...")
+        gdown.download(url, MODEL_PATH, quiet=False)
+
+    # تحميل الموديل
     return joblib.load(MODEL_PATH)
 
+# تحميل الموديل
 model = load_model()
 
-# --- Streamlit UI ---
-st.title("Flight Price Prediction App (Random Forest)")
+st.title("✈️ Flight Price Prediction App (Random Forest)")
 
+# --- Inputs ---
 airline = st.selectbox("Airline", ["AirAsia", "Air India", "GoAir", "IndiGo", "SpiceJet", "Vistara"])
 source_city = st.selectbox("Source City", ["Banglore", "Chennai", "Delhi", "Kolkata", "Mumbai", "Hyderabad"])
 departure_time = st.selectbox("Departure Time", ["Morning", "Afternoon", "Evening", "Night", "Early Morning", "Late Night"])
@@ -30,6 +35,7 @@ travel_class = st.selectbox("Class", ["Economy", "Business"])
 duration = st.number_input("Duration (hours)", min_value=0.0, step=0.1)
 days_left = st.number_input("Days Left Before Flight", min_value=0, step=1)
 
+# --- Predict ---
 if st.button("Predict Price"):
     input_data = pd.DataFrame({
         "airline": [airline],
@@ -43,5 +49,4 @@ if st.button("Predict Price"):
     })
 
     prediction = model.predict(input_data)[0]
-    usd_price = prediction   # تقريبًا 1 USD = 83 INR
-    st.success(f"Predicted Price: ${usd_price:,.2f} USD")
+    st.success(f"Predicted Price: ${prediction:,.2f}")
